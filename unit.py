@@ -21,9 +21,39 @@ class Unit:
         self.health -= max(0, (damage - self.defense) * multiplier)
 
     def attack_enemy(self, enemy):
-        """Attack the enemy unit and cause damage."""
-        if self.is_alive() and enemy.is_alive():
-            enemy.take_damage(self.attack, self)
+        if self.is_in_range(enemy):
+            damage = self.attack - enemy.defense
+            enemy.take_damage(damage)
+            print(f"{self.__class__.__name__} a infligé {damage} points de dégâts à {enemy.__class__.__name__}")
+
+    def is_in_range(self, enemy):
+        """Check if the enemy unit is in attack range."""
+        raise NotImplementedError("is_in_range() doit être implémentée dans les sous-classes.")
+
+    def move_towards_enemy(self, enemies, board):
+        closest_enemy = None
+        min_distance = float("inf")
+
+        for enemy in enemies:
+            distance = abs(self.x - enemy.x) + abs(self.y - enemy.y)
+            if distance < min_distance:
+                min_distance = distance
+                closest_enemy = enemy
+
+        dx = closest_enemy.x - self.x
+        dy = closest_enemy.y - self.y
+
+        move_x, move_y = 0, 0
+        if abs(dx) > abs(dy):
+            move_x = 1 if dx > 0 else -1
+        else:
+            move_y = 1 if dy > 0 else -1
+
+        new_x, new_y = self.x + move_x, self.y + move_y
+        if 0 <= new_x < board.size and 0 <= new_y < board.size:
+            board.move_unit(self, new_x, new_y)
+            self.x, self.y = new_x, new_y
+        
 
 class FireElemental(Unit):
     def __init__(self):
@@ -35,6 +65,12 @@ class FireElemental(Unit):
         elif isinstance(attacker, WaterElemental):
             return 2
         return 1
+    
+    def is_in_range(self, enemy):
+        x_diff = abs(self.x - enemy.x)
+        y_diff = abs(self.y - enemy.y)
+        return x_diff == 2 and y_diff == 2
+    
     @classmethod
     def get_cost(cls):
         return cls().cost
@@ -49,6 +85,12 @@ class WaterElemental(Unit):
         elif isinstance(attacker, EarthElemental):
             return 2
         return 1
+    
+    def is_in_range(self, enemy):
+        x_diff = abs(self.x - enemy.x)
+        y_diff = abs(self.y - enemy.y)
+        return x_diff == 2 and y_diff == 2
+    
     @classmethod
     def get_cost(cls):
         return cls().cost
@@ -63,6 +105,12 @@ class AirElemental(Unit):
         elif isinstance(attacker, FireElemental):
             return 2
         return 1
+    
+    def is_in_range(self, enemy):
+        x_diff = abs(self.x - enemy.x)
+        y_diff = abs(self.y - enemy.y)
+        return (x_diff == 1 and y_diff == 0) or (x_diff == 0 and y_diff == 1)
+    
     @classmethod
     def get_cost(cls):
         return cls().cost
@@ -77,6 +125,12 @@ class EarthElemental(Unit):
         elif isinstance(attacker, AirElemental):
             return 0.5
         return 1
+    
+    def is_in_range(self, enemy):
+        x_diff = abs(self.x - enemy.x)
+        y_diff = abs(self.y - enemy.y)
+        return (x_diff == 1 and y_diff == 0) or (x_diff == 0 and y_diff == 1)
+    
     @classmethod
     def get_cost(cls):
         return cls().cost

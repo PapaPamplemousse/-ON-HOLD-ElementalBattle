@@ -1,6 +1,7 @@
 from unit import FireElemental, WaterElemental, AirElemental, EarthElemental
 from player import Player
 from game import play_game
+from board import Board
 
 def recruit_units(player):
     player.recruit_unit(FireElemental)
