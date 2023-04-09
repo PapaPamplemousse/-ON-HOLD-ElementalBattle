@@ -1,8 +1,7 @@
 class Player:
-    def __init__(self, name, units, gold):
+    def __init__(self, name, inventory, gold):
         self.name = name
-        self.units = units
-        self.inventory = []
+        self.inventory = inventory
         self.gold = gold
         self.units_lost = 0
 
@@ -10,28 +9,21 @@ class Player:
         """Return True if the player has any alive units, otherwise False."""
         return any(unit.is_alive() for unit in self.units)
 
-    def recruit_unit(self, unit_class):
-        """Recruit a new unit if the player has enough gold."""
-        if self.gold >= unit_class.get_cost():
-            self.gold -= unit_class.get_cost()
-            self.units.append(unit_class())
-            print(f"{self.name} a recruté un {unit_class.__name__}")
-        else:
-            print(f"{self.name} n'a pas assez d'or pour recruter un {unit_class.__name__}")
-
     def earn_gold(self, amount):
         """Increase the player's gold by the specified amount."""
         self.gold += amount
         
-    def recruit_unit(self, unit_class):
-        """Recruit a new unit if the player has enough gold."""
-        if self.gold >= unit_class.get_cost():
-            self.gold -= unit_class.get_cost()
-            self.inventory.append(unit_class())
-            print(f"{self.name} a recruté un {unit_class.__name__}")
-        else:
-            print(f"{self.name} n'a pas assez d'or pour recruter un {unit_class.__name__}")
-
+    def recruit_unit(self, unit_class, player):
+        unit_cost = unit_class.cost
+        if self.gold >= unit_cost:
+            self.gold -= unit_cost
+            self.inventory.append(unit_class(player))  # Pass player as an argument
+            return True
+        return False
+    
+    def count_units(self, unit_class):
+        return sum(1 for unit in self.inventory if isinstance(unit, unit_class))
+    
     def place_unit(self, unit, x, y, board):
         """Place a unit from the inventory onto the board."""
         if unit in self.inventory and board.place_unit(unit, x, y):
