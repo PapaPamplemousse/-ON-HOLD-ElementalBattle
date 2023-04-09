@@ -20,8 +20,8 @@ def main():
     def start_single_player():
         nonlocal mode
         mode = single_player_mode
-        single_player_mode.recruitment_end_time = pygame.time.get_ticks() + 60000  # Reset the recruitment timer
-
+        single_player_mode.recruitment_end_time = pygame.time.get_ticks() + 10000  # Reset the recruitment timer
+        
     def start_two_player():
         nonlocal mode
         mode = two_player_mode
